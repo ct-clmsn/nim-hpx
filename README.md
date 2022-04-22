@@ -4,7 +4,7 @@
 <!--   file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)        -->
 # [nim-hpx - STE||AR HPX wrapper for Nim](https://github.com/ct-clmsn/nim-hpx)
 
-Nim is a system language emphasizing productivity. [STE||AR HPX](https://github.com/STEllAR-GROUP/hpx)
+[Nim](https://nim-lang.org) is a system language emphasizing productivity. [STE||AR HPX](https://github.com/STEllAR-GROUP/hpx)
 is a high performance computing (HPC)/supercomputing runtime
 system. `nim-hpx` provides STE||AR HPX wrapper for Nim.
 
