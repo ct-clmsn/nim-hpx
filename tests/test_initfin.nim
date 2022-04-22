@@ -43,6 +43,11 @@ var values = newSeq[int](10)
 for i in 0..<10:
     values[i] = i
 
+# the 'cdecl' pragma exposes the
+# nim function to C/C++; this is
+# mandatory for using hpx parallel
+# algorithms
+#
 proc fn(x : var int) {.cdecl.} =
     x+=1
 
@@ -59,7 +64,6 @@ echo(values)
 
 foreach_n(seq_exec, values, values.len, fn)
 echo(values)
-
 
 var arrvalues : array[10, int]
 
@@ -79,6 +83,11 @@ echo(arrvalues)
 foreach_n(par_exec, arrvalues, arrvalues.len, fn)
 echo(arrvalues)
 
+# the 'plain_action' macro exposes
+# the nim function to C/C++ and the
+# hpx; this is mandatory for remote,
+# asynchronous, function execution
+#
 proc fnhello() {.plain_action.} =
    echo "hello"
 
