@@ -21,6 +21,7 @@ Nim developers can implement HPC applications targeting single node/multicore sy
 * remote asynchronous function execution (50%)
 * more parallel algorithms (reduce, transform, etc)
 * collective communications
+* components (remote method invocation)
 
 ### Installation Requirements
 
