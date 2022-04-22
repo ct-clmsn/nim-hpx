@@ -6,7 +6,7 @@
 
 [Nim](https://nim-lang.org) is a system language emphasizing productivity. [STE||AR HPX](https://github.com/STEllAR-GROUP/hpx)
 is a high performance computing (HPC)/supercomputing runtime
-system. `nim-hpx` provides a STE||AR HPX wrapper for Nim.
+system.
 
 Nim developers can implement HPC applications targeting single
 node/multicore systems and distributed memory systems (multi-node/multicore
