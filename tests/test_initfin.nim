@@ -21,7 +21,7 @@ var futv1 : future[void] = v1.register_as("v1")
 futv1.get()
 echo "1 pseq size\t", v1.size()
 
-var v2dist : container_distribution = newContainerDistribution(10)
+var v2dist : container_distribution = newContainerDistribution(2)
 var v2 : partitioned_seq[int] = newPartitionedSeq[int](10, 0, v2dist)
 var futv2 : future[void] = v2.register_as("v3")
 futv2.get()
