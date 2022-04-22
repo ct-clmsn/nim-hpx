@@ -1,0 +1,6 @@
+SPDXVersion: SPDX-2.1
+DataLicense: CC0-1.0
+PackageName: nim-hpx
+PackageOriginator: Christopher Taylor
+PackageHomePage: https://github.com/ct-clmsn/nim-hpx
+PackageLicenseDeclared: BSL-1.0
