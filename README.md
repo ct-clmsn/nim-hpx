@@ -2,7 +2,7 @@
 <!--                                                                                -->
 <!--   Distributed under the Boost Software License, Version 1.0. (See accompanying -->
 <!--   file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)        -->
-# [nim-hpx - STE||AR HPX runtime system wrapper for Nim](https://github.com/ct-clmsn/nim-hpx)
+# [nim-hpx - STE||AR HPX wrapper for Nim](https://github.com/ct-clmsn/nim-hpx)
 
 Nim is a system language emphasizing productivity. STE||AR HPX
 is a high performance computing (HPC)/supercomputing runtime
