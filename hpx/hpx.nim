@@ -48,11 +48,20 @@ void find_all_localities_ptr(size_t value, hpx::id_type * iidents) {
         (*(iidents+i)) = idents[i];
     }
 }
-
 """.}
 
 import std/macros
 
+# generates a statement list the
+# first element is the function's
+# AST node with pragmas that expose
+# the function to C/C++ interop and
+# override the nim compiler's naming
+# scheme (making the compiled name
+# of the function predictable); the
+# second element is a C/C++ code emit
+# that exposes the function to hpx
+#
 proc plain_action_code(n : NimNode) : NimNode =
     result = newStmtList()
     let fnname : string = $name(n)
@@ -165,9 +174,9 @@ proc `[]`*[V](self : partitioned_seq[V], pos : int) : V {.importcpp: "#[@]", hea
 ##########
 # unordered_map
 # 
-proc newUnorderedMap*[K,V]() : unordered_map[K,V] {.importcpp: "{}", header : "<hpx/include/partitioned_vector.hpp>".}
+proc newUnorderedMap*[K,V]() : unordered_map[K,V] {.importcpp: "{}", header : "<hpx/include/unordered_map.hpp>".}
 
-proc newUnorderedMap*[K,V](count : int) : unordered_map[K,V] {.importcpp: "{@}", header : "<hpx/include/partitioned_vector.hpp>".}
+proc newUnorderedMap*[K,V](count : int) : unordered_map[K,V] {.importcpp: "{@}", header : "<hpx/include/unordered_map.hpp>".}
 
 proc register_as_impl[K, V](self : unordered_map[K, V], symbolic_name : cstring) : future[void] {.importcpp: "#.register_as(std::string{@})", header : "<hpx/include/unordered_map.hpp>".}
 
@@ -187,7 +196,7 @@ proc get_value*[K,V](self : unordered_map[K,V], part : int, pos : K) : future[V]
 proc set_value*[K,V](self : unordered_map[K,V], pos : K, value : V) : future[void] {.importcpp: "#.set_value(@)", header: "<hpx/include/unordered_map.hpp>".}
 proc set_value*[K,V](self : unordered_map[K,V], part : int, pos : K, value : V) : future[void] {.importcpp: "#.set_value(@)", header: "<hpx/include/unordered_map.hpp>".}
 
-proc `[]`*[K,V](self : unordered_map[K,V], pos : K) : V {.importcpp: "#[@]", header: "<hpx/include/unordered_map.hpp.hpp>".}
+proc `[]`*[K,V](self : unordered_map[K,V], pos : K) : V {.importcpp: "#[@]", header: "<hpx/include/unordered_map.hpp>".}
 
 proc erase*[K,V](self : unordered_map[K,V], pos : K) : future[csize_t] {.importcpp: "#.erase(@)", header: "<hpx/include/unordered_map.hpp>".}
 
