@@ -16,7 +16,7 @@ global address space and parallelism feature set.
 ### Supports
 
 * futures
-* asynchronous function execution
+* local asynchronous function execution
 * parallel algorithms (foreach, etc)
 * partitioned sequences
 
