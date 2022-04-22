@@ -15,10 +15,16 @@ global address space and parallelism feature set.
 
 ### Supports
 
-* futures, promises
+* futures
 * asynchronous function execution
-* parallel algorithms (foreach, transform, reduce, etc)
+* parallel algorithms (foreach, etc)
 * partitioned sequences
+
+### TODO
+
+* promises
+* remote asynchronous function execution (50%)
+* more parallel algorithms (reduce, transform, etc)
 * collective communications
 
 ### Installation Requirements
