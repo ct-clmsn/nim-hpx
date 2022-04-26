@@ -21,23 +21,18 @@ var futv1 : future[void] = v1.register_as("v1")
 futv1.get()
 echo "1 pseq size\t", v1.size()
 
-var v2dist : container_distribution = newContainerDistribution(2)
-var v2 : partitioned_seq[int] = newPartitionedSeq[int](10, 0, v2dist)
-var futv2 : future[void] = v2.register_as("v3")
-futv2.get()
-echo "2 pseq size\t", v2.size()
-
-var idents : seq[id_type] = find_all_localities()
+var idents : seq[id_type] = findAllLocalities()
 for id in idents:
     var gid = id.gid()
     echo gid.msb(), ' ', gid.lsb()
 
-var fval : future[cuint] = get_num_localities()
+var fval : future[cuint] = getNumLocalities()
+let numLocalities : int = int(fval.get)
 
-echo "get_num_localities\t", fval.get
-echo "get_locality_id\t", get_locality_id()
-echo "get_os_thread_count\t", get_os_thread_count()
-echo "get_worker_thread_num\t", get_worker_thread_num()
+echo "\ngetNumLocalities\t", numLocalities
+echo "getLocalityId\t", get_locality_id()
+echo "getOsThreadCount\t", get_os_thread_count()
+echo "getWorkerThreadNum\t", get_worker_thread_num()
 
 var values = newSeq[int](10)
 for i in 0..<10:
@@ -88,14 +83,35 @@ echo(arrvalues)
 # hpx; this is mandatory for remote,
 # asynchronous, function execution
 #
+
+# action does something takes no input and returns no output
 proc fnhello() {.plain_action.} =
    echo "hello"
 
-proc fnval() : int {.cdecl.} =
+for i in 0..<numLocalities:
+    var f : future[void] = async(fnhello, getIdFromLocalityId(i))
+    f.get()
+
+# function accepts no input, returns output
+proc fnval() : int {.plain_action.} =
    result = 1
 
-var f : future[void] = async(fnhello)
-f.get()
-
-var g : future[int] = async(fnval)
+var g : future[int] = async(fnval, findHere())
 echo g.get()
+
+# function accepts input, returns output
+proc fnargval(a : int, b : int) : int {.plain_action.} =
+    result = 1
+
+var h : future[int] = async(fnargval, findHere(), 1, 1)
+echo h.get()
+
+# function accepts input, returns no output
+proc fnargnval(a : int, b : int) {.plain_action.} =
+    echo a, '\t', b
+
+var i : future[void] = async(fnargnval, findHere(), 1, 1)
+i.get()
+
+#var j : future[void] = async(fnhello, idents[1], 1, 1)
+#j.get()

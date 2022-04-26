@@ -4,24 +4,29 @@
 <!--   file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)        -->
 # [nim-hpx - STE||AR HPX wrapper for Nim](https://github.com/ct-clmsn/nim-hpx)
 
-[Nim](https://nim-lang.org) is a system language emphasizing productivity. [STE||AR HPX](https://github.com/STEllAR-GROUP/hpx) is a high performance computing (HPC)/supercomputing runtime system.
+[Nim](https://nim-lang.org) is a system language emphasizing productivity. [STE||AR HPX](https://github.com/STEllAR-GROUP/hpx)
+is a high performance computing (HPC)/supercomputing runtime
+system. `nim-hpx` provides STE||AR HPX wrapper for Nim.
 
-Nim developers can implement HPC applications targeting single node/multicore systems and distributed memory systems (clusters or multi-node/multicore systems). `nim-hpx` exposes STE||AR HPX's asynchronous global address space, asynchronous execution, and parallelism feature sets.
+Nim developers can implement HPC applications targeting single
+node/multicore systems and distributed memory systems (multi-node
+/multicore systems). `nim-hpx` exposes STE||AR HPX's asynchronous
+global address space and parallelism feature set.
 
-### Supports
+### Currently Supports
 
 * futures
-* local asynchronous function execution
-* parallel algorithms (foreach, etc)
+* asynchronous function execution
+* distributed (remote) asynchronous function execution
 * partitioned sequences
+* distributed partitioned sequences
+* parallel for
 
 ### TODO
 
 * promises
-* remote asynchronous function execution (50%)
 * more parallel algorithms (reduce, transform, etc)
 * collective communications
-* components (remote method invocation)
 
 ### Installation Requirements
 
@@ -33,7 +38,7 @@ Dependencies:
 * papi
 * APEX
 * tcmalloc
-* boost
+* Boost
 * STE||AR HPX
 
 ### Application compilation

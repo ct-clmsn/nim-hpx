@@ -13,5 +13,9 @@ license       = "boost"
 # Dependencies
 requires "nim >= 0.18.0"
 
+backend = "cpp"
+requires "cppstl"
+requires "jsony"
+
 task gendoc, "Generate documentation":
   exec("nimble doc --project hpx.nim --out:docs/")
