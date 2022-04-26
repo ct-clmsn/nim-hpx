@@ -8,10 +8,10 @@
 is a high performance computing (HPC)/supercomputing runtime
 system. `nim-hpx` provides STE||AR HPX wrapper for Nim.
 
-Nim developers can implement HPC applications targeting single
-node/multicore systems and distributed memory systems (multi-node
-/multicore systems). `nim-hpx` exposes STE||AR HPX's asynchronous
-global address space and parallelism feature set.
+`nim-hpx` exposes STE||AR HPX's asynchronous global address space and
+parallelism feature set. `nim-hpx` provides Nim developers tooling to
+implement HPC applications targeting single node/multicore systems and
+distributed memory systems (multi-node/multicore systems).
 
 ### Currently Supports
 
