@@ -155,7 +155,7 @@ proc registerAs*[V](self : partitionedSeq[V], symbolic_name : string) : future[v
 proc connectToImpl[V](self : partitionedSeq[V], symbolic_name : cstring) : future[void] {.importcpp: "#.connect_to(std::string{@})", header : "<hpx/include/partitioned_vector.hpp>".}
 
 proc connectTo*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] =
-    result = connect_to_impl[V](self, cstring(symbolic_name))
+    result = connectToImpl[V](self, cstring(symbolic_name))
 
 proc getNumPartitions*[V](self : partitionedSeq[V]) : csize_t {.importcpp: "#.get_num_partitions()", header : "<hpx/include/partitioned_vector.hpp>".}
 
