@@ -516,4 +516,4 @@ proc plain_action_code(n : NimNode) : NimNode =
             #echo async_sig 
             result.add( parseStmt( async_sig ) )
 
-macro plain_action*(n : typed) : untyped = n.plain_action_code
+macro plainAction*(n : typed) : untyped = n.plain_action_code

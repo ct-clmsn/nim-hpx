@@ -78,36 +78,38 @@ echo(arrvalues)
 foreach_n(par_exec, arrvalues, arrvalues.len, fn)
 echo(arrvalues)
 
-# the 'plain_action' macro exposes
+# the 'plainAction' macro exposes
 # the nim function to C/C++ and the
 # hpx; this is mandatory for remote,
 # asynchronous, function execution
 #
 
 # action does something takes no input and returns no output
-proc fnhello() {.plain_action.} =
+proc fnhello() {.plainAction.} =
    echo "hello"
+
+fnhello()
 
 for i in 0..<numLocalities:
     var f : future[void] = async(fnhello, getIdFromLocalityId(i))
     f.get()
 
 # function accepts no input, returns output
-proc fnval() : int {.plain_action.} =
+proc fnval() : int {.plainAction.} =
    result = 1
 
 var g : future[int] = async(fnval, findHere())
 echo g.get()
 
 # function accepts input, returns output
-proc fnargval(a : int, b : int) : int {.plain_action.} =
+proc fnargval(a : int, b : int) : int {.plainAction.} =
     result = 1
 
 var h : future[int] = async(fnargval, findHere(), 1, 1)
 echo h.get()
 
 # function accepts input, returns no output
-proc fnargnval(a : int, b : int) {.plain_action.} =
+proc fnargnval(a : int, b : int) {.plainAction.} =
     echo a, '\t', b
 
 var i : future[void] = async(fnargnval, findHere(), 1, 1)
