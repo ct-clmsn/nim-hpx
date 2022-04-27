@@ -84,7 +84,7 @@ type
    partitionedSeq*[V] {.importcpp: "hpx::partitioned_vector<'0>", header: "<hpx/include/partitioned_vector.hpp>".} = object
    unorderedMap*[K, V] {.importcpp: "hpx::unordered_map<'0, '1>", header: "<hpx/include/unordered_map.hpp>".} = object
 
-   containerDistribution* {.importcpp: "hpx::container_distribution_policy", header: "<hpx/modules/distribution_policies.hpp>".} = object
+   #containerDistribution* {.importcpp: "hpx::container_distribution_policy", header: "<hpx/modules/distribution_policies.hpp>".} = object
 
    sequencedPolicy* {.importcpp: "hpx::execution::sequenced_policy", header: "<hpx/modules/executors.hpp>".} = object
    parallelPolicy* {.importcpp: "hpx::execution::parallel_policy", header: "<hpx/modules/executors.hpp>".} = object
@@ -131,10 +131,10 @@ proc makeReadyFuture*() : future[void] {.importcpp: "hpx::make_ready_future()", 
 # template async*(fn, args : varargs[expr]) : stmt =
 ]#
 
-proc newContainerDistributionImpl(seg : int) : containerDistribution {.importcpp: "create_distribution(#)", header : "<hpx/modules/distribution_policies.hpp>".}
+#proc newContainerDistributionImpl(seg : int) : containerDistribution {.importcpp: "create_distribution(#)", header : "<hpx/modules/distribution_policies.hpp>".}
 
-proc newContainerDistribution*(seg : int) : containerDistribution =
-    result = newContainerDistributionImpl(seg)
+#proc newContainerDistribution*(seg : int) : containerDistribution =
+#    result = newContainerDistributionImpl(seg)
 
 ##########
 # partitionedSeq
@@ -145,7 +145,7 @@ proc newPartitionedSeq*[V](count : int) : partitionedSeq[V] {.importcpp: "{@}", 
 
 proc newPartitionedSeq*[V](count : int, ini: V) : partitionedSeq[V] {.importcpp: "{@}", header : "<hpx/include/partitioned_vector.hpp>".}
 
-proc newPartitionedSeq*[V](count : int, ini : V, dist : containerDistribution) : partitionedSeq[V] {.importcpp: "{#, #, #}", header : "<hpx/include/partitioned_vector.hpp>".}
+#proc newPartitionedSeq*[V](count : int, ini : V, dist : containerDistribution) : partitionedSeq[V] {.importcpp: "{#, #, #}", header : "<hpx/include/partitioned_vector.hpp>".}
 
 proc registerAsImpl[V](self : partitionedSeq[V], symbolic_name : cstring) : future[void] {.importcpp: "#.register_as(std::string{@})", header : "<hpx/include/partitioned_vector.hpp>".}
 
