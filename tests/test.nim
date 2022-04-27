@@ -9,7 +9,7 @@ import ../hpx/hpx
 # register partitionedSeq types before
 # instantiating them
 #
-register_partitionedSeq(int)
+registerPartitionedSeq(int)
 
 var v : partitionedSeq[int] = newPartitionedSeq[int](10)
 var futv : future[void] = v.register_as("v")
