@@ -18,8 +18,8 @@ endif
 CFLAGS=-std=c++17
 
 all:
-	nim cpp --clibdir:$(LIBDIR) -d:danger -d:globalSymbols --cincludes:$(INCDIR) --passC:"$(CFLAGS)" tests/test_initfin.nim
-	mv tests/test_initfin .
+	nim cpp --clibdir:$(LIBDIR) -d:danger -d:globalSymbols --cincludes:$(INCDIR) --passC:"$(CFLAGS)" tests/test.nim
+	mv tests/test .
 
 clean:
-	rm test_initfin
+	rm test
