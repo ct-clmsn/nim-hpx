@@ -12,12 +12,12 @@ import ../hpx/hpx
 registerPartitionedSeq(int)
 
 var v : partitionedSeq[int] = newPartitionedSeq[int](10)
-var futv : future[void] = v.register_as("v")
+var futv : future[void] = v.registerAs("v")
 futv.get()
 echo "0 pseq size\t", v.size()
 
 var v1 : partitionedSeq[int] = newPartitionedSeq[int](10, 0)
-var futv1 : future[void] = v1.register_as("v1")
+var futv1 : future[void] = v1.registerAs("v1")
 futv1.get()
 echo "1 pseq size\t", v1.size()
 
@@ -30,9 +30,9 @@ var fval : future[cuint] = getNumLocalities()
 let numLocalities : int = int(fval.get)
 
 echo "\ngetNumLocalities\t", numLocalities
-echo "getLocalityId\t", get_locality_id()
-echo "getOsThreadCount\t", get_os_thread_count()
-echo "getWorkerThreadNum\t", get_worker_thread_num()
+echo "getLocalityId\t", getLocalityId()
+echo "getOsThreadCount\t", getOsThreadCount()
+echo "getWorkerThreadNum\t", getWorkerThreadNum()
 
 var values = newSeq[int](10)
 for i in 0..<10:
