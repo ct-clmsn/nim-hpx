@@ -48,16 +48,16 @@ proc fn(x : var int) {.cdecl.} =
 
 echo(values)
 
-foreach(par_exec, values, fn)
+foreach(parExec, values, fn)
 echo(values)
 
-foreach_n(par_exec, values, values.len, fn)
+foreach_n(parExec, values, values.len, fn)
 echo(values)
 
-foreach(seq_exec, values, fn)
+foreach(seqExec, values, fn)
 echo(values)
 
-foreach_n(seq_exec, values, values.len, fn)
+foreach_n(seqExec, values, values.len, fn)
 echo(values)
 
 var arrvalues : array[10, int]
@@ -66,16 +66,16 @@ for i in 0..<10:
     arrvalues[i] = i
 echo(arrvalues)
 
-foreach(seq_exec, arrvalues, fn)
+foreach(seqExec, arrvalues, fn)
 echo(arrvalues)
 
-foreach_n(seq_exec, arrvalues, arrvalues.len, fn)
+foreach_n(seqExec, arrvalues, arrvalues.len, fn)
 echo(arrvalues)
 
-foreach(par_exec, arrvalues, fn)
+foreach(parExec, arrvalues, fn)
 echo(arrvalues)
 
-foreach_n(par_exec, arrvalues, arrvalues.len, fn)
+foreach_n(parExec, arrvalues, arrvalues.len, fn)
 echo(arrvalues)
 
 # the 'plainAction' macro exposes
