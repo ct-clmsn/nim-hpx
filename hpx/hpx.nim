@@ -137,7 +137,7 @@ proc newContainerDistribution*(seg : int) : containerDistribution =
     result = newContainerDistributionImpl(seg)
 
 ##########
-# partitioned_seq
+# partitionedSeq
 # 
 proc newPartitionedSeq*[V]() : partitionedSeq[V] {.importcpp: "{}", header : "<hpx/include/partitioned_vector.hpp>".}
 
@@ -145,7 +145,7 @@ proc newPartitionedSeq*[V](count : int) : partitionedSeq[V] {.importcpp: "{@}", 
 
 proc newPartitionedSeq*[V](count : int, ini: V) : partitionedSeq[V] {.importcpp: "{@}", header : "<hpx/include/partitioned_vector.hpp>".}
 
-proc newPartitionedSeq*[V](count : int, ini : V, dist : containerDistribution) : partitioned_seq[V] {.importcpp: "{#, #, #}", header : "<hpx/include/partitioned_vector.hpp>".}
+proc newPartitionedSeq*[V](count : int, ini : V, dist : containerDistribution) : partitionedSeq[V] {.importcpp: "{#, #, #}", header : "<hpx/include/partitioned_vector.hpp>".}
 
 proc registerAsImpl[V](self : partitionedSeq[V], symbolic_name : cstring) : future[void] {.importcpp: "#.register_as(std::string{@})", header : "<hpx/include/partitioned_vector.hpp>".}
 

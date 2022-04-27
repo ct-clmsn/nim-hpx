@@ -6,17 +6,17 @@
 #
 import ../hpx/hpx
 
-# register partitioned_seq types before
+# register partitionedSeq types before
 # instantiating them
 #
-register_partitioned_seq(int)
+register_partitionedSeq(int)
 
-var v : partitioned_seq[int] = newPartitionedSeq[int](10)
+var v : partitionedSeq[int] = newPartitionedSeq[int](10)
 var futv : future[void] = v.register_as("v")
 futv.get()
 echo "0 pseq size\t", v.size()
 
-var v1 : partitioned_seq[int] = newPartitionedSeq[int](10, 0)
+var v1 : partitionedSeq[int] = newPartitionedSeq[int](10, 0)
 var futv1 : future[void] = v1.register_as("v1")
 futv1.get()
 echo "1 pseq size\t", v1.size()
