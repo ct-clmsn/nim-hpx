@@ -78,6 +78,26 @@ echo(arrvalues)
 foreach_n(parExec, arrvalues, arrvalues.len, fn)
 echo(arrvalues)
 
+var farrvalues : array[10, float]
+
+proc ap(a:float, b:float) : float {.cdecl.} =
+    result = a + b
+
+proc xsfm(a:int) : float {.cdecl.} =
+    result = float(a)
+
+echo farrvalues
+
+transform(seqExec, arrvalues, farrvalues, xsfm)
+
+echo farrvalues
+
+var trf : float = transformReduce(seqExec, arrvalues, 0.0, ap, xsfm)
+echo trf
+
+#var fftrm : future[float] = transformReduce(parExec, arrvalues, 0.0, ap, xsfm)
+#echo fftrm.wait()
+
 # the 'plainAction' macro exposes
 # the nim function to C/C++ and the
 # hpx; this is mandatory for remote,
@@ -88,8 +108,13 @@ echo(arrvalues)
 proc fnhello() {.plainAction.} =
    echo "hello"
 
+# synchronous exection of plain action
+#
 fnhello()
 
+# asynchronous execution of an action
+# on different localities
+#
 for i in 0..<numLocalities:
     var f : future[void] = async(fnhello, getIdFromLocalityId(i))
     f.get()
@@ -98,6 +123,9 @@ for i in 0..<numLocalities:
 proc fnval() : int {.plainAction.} =
    result = 1
 
+# asynchronous execution of action that returns
+# a value
+#
 var g : future[int] = async(fnval, findHere())
 echo g.get()
 
