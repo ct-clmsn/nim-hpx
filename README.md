@@ -16,16 +16,12 @@ distributed memory systems (multi-node/multicore systems).
 ### Currently Supports
 
 * futures
-* asynchronous function execution
-* distributed (remote) asynchronous function execution
-* partitioned sequences
-* distributed partitioned sequences
-* parallel for
+* local/distributed asynchronous function execution
+* local/distributed partitioned sequences
+* parallel `for`, `reduce`, `transform`, `transformReduce`
 
 ### TODO
 
-* promises
-* more parallel algorithms (reduce, transform, etc)
 * collective communications
 
 ### Installation Requirements
