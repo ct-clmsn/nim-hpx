@@ -271,6 +271,11 @@ proc transform*[V, W]( policy : SomeSeqPolicy, vals : var openArray[V], ovals : 
     assert(vals.len == ovals.len)
     transformImpl[V,W](policy, vals[0].addr, vals[vals.len-1].addr, ovals[0].addr, fn)
 
+proc reduceImpl[V]( policy : SomeExecutionPolicy, valbeg : ptr V, valend : ptr V, initVal : V, fn : proc(v: V, w : V) : V {.cdecl.} ) : V {.importcpp: "hpx::reduce(#, #, #, #, #)", header : "hpx/modules/algorithms.hpp".}
+
+proc reduce*[V]( policy : SomeExecutionPolicy, vals : var openArray[V], initVal : V, fn : proc(v: V, w : V) : V {.cdecl.} ) : V =
+    result = reduceImpl[V](policy, vals[0].addr, vals[vals.len-1].addr, initVal, fn)
+
 proc transformReduceImpl*[V, W]( policy : SomeExecutionPolicy, valbeg : ptr V, valend : ptr V, initVal : W, binfn : proc(v : W, w : W) : W {.cdecl.}, fn : proc(v : V) : W {.cdecl.} ) : W {.importcpp: "hpx::transform_reduce(#, #, #, #, #, #)", header : "hpx/modules/algorithms.hpp".}
 
 proc transformReduce*[V, W]( policy : SomeExecutionPolicy, vals : var openArray[V], initVal : W, binfn : proc(v : W, w : W) : W {.cdecl.}, fn : proc(v: V) : W {.cdecl.} ) : W =

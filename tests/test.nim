@@ -98,6 +98,14 @@ echo trf
 var fftrm : float = transformReduce(parExec, arrvalues, 0.0, ap, xsfm)
 echo fftrm
 
+var farrvals : array[10, float]
+
+for i in 0..<10:
+    farrvals[i] = float(i)
+
+var redo : float = reduce(parExec, farrvalues, 0.0, ap)
+echo farrvals, '\t', redo
+
 # the 'plainAction' macro exposes
 # the nim function to C/C++ and the
 # hpx; this is mandatory for remote,
