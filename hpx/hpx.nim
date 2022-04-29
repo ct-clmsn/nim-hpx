@@ -269,25 +269,54 @@ proc transformImpl[V, W]( policy : SomeSeqPolicy, valbeg : ptr V, valend : ptr V
 
 proc transform*[V, W]( policy : SomeSeqPolicy, vals : var openArray[V], ovals : var openArray[W], fn : proc(v: V) : W {.cdecl.} ) =
     assert(vals.len == ovals.len)
-    transformImpl[V,W](policy, cast[ptr V](vals[0].addr), cast[ptr V](vals[vals.len-1].addr), cast[ptr W](ovals[0].addr), fn)
+    transformImpl[V,W](policy, vals[0].addr, vals[vals.len-1].addr, ovals[0].addr, fn)
 
-proc transformReduceImpl[V, W]( policy : SomeSeqPolicy, valbeg : ptr V, valend : ptr V, initVal : W, binfn : proc(v : W, w : W) : W {.cdecl.}, fn : proc(v : V) : W {.cdecl.} ) : W {.importcpp: "hpx::transform_reduce(#, #, #, #, #, #)", header : "hpx/modules/algorithms.hpp".}
+proc transformReduceImpl*[V, W]( policy : SomeExecutionPolicy, valbeg : ptr V, valend : ptr V, initVal : W, binfn : proc(v : W, w : W) : W {.cdecl.}, fn : proc(v : V) : W {.cdecl.} ) : W {.importcpp: "hpx::transform_reduce(#, #, #, #, #, #)", header : "hpx/modules/algorithms.hpp".}
 
-proc transformReduce*[V, W]( policy : SomeSeqPolicy, vals : var openArray[V], initVal : W, binfn : proc(v : W, w : W) : W {.cdecl.}, fn : proc(v: V) : W {.cdecl.} ) : W =
+proc transformReduce*[V, W]( policy : SomeExecutionPolicy, vals : var openArray[V], initVal : W, binfn : proc(v : W, w : W) : W {.cdecl.}, fn : proc(v: V) : W {.cdecl.} ) : W =
     result = transformReduceImpl[V,W](policy, cast[ptr V](vals[0].addr), cast[ptr V](vals[vals.len-1].addr), initVal, binfn, fn)
 
-#proc parTransformReduceImpl[V, W]( policy : SomeParPolicy, valbeg : ptr V, valend : ptr V, initVal : W, binfn : proc(v : W, w : W) : W {.cdecl.}, fn : proc(v : V) : W {.cdecl.} ) : future[W] {.noinit importcpp: "hpx::transform_reduce(#, #, #, #, #, #)", header : "hpx/modules/algorithms.hpp".}
+#[
+proc transformReduceImpl*(policy : NimNode, vals : NimNode, initVal : NimNode, binfn: NimNode, fn : NimNode) : NimNode = 
+        var valueStr : string
+   
+        case initVal.kind:
+        of nnkNone, nnkEmpty, nnkNilLit:
+            error("initVal is None, Empty or Nil")
+        of nnkCharLit..nnkUInt64Lit:
+            valueStr = $(initVal.intVal)
+        of nnkFloatLit..nnkFloat64Lit:
+            valueStr = $(initVal.floatVal)
+        of nnkStrLit..nnkTripleStrLit, nnkCommentStmt, nnkIdent, nnkSym:
+            valueStr = initVal.strVal
+        else:
+            error("initVal is not an int, float, or string")
 
-#proc parTransformReduce*[V, W](policy : SomeParPolicy, vals : var openArray[V], initVal : W, binfn : proc(v : W, w : W) : W {.cdecl.}, fn : proc(v: V) : W {.cdecl.} ) : future[W] =
-#    result = parTransformReduceImpl[V,W](policy, cast[ptr V](vals[0].addr), cast[ptr V](vals[vals.len-1].addr), initVal, binfn, fn)
+        let policys = policy.strVal 
+        let valss = vals.strVal
+        let binfns = binfn.strVal
+        let fns = fn.strVal
+
+        if(policys == "seqExec" or policys == "unseqExec"):
+            echo("seqTransformReduceImpl(" & policys & ", " & valss & "[0].addr, " & valss & "[" & valss & ".len-1].addr, " & valueStr & ", " & binfns & ", " & fns & ")")
+            result = parseExpr("seqTransformReduceImpl(" & policys & ", " & valss & "[0].addr, " & valss & "[" & valss & ".len-1].addr, " & valueStr & ", " & binfns & ", " & fns & ")")
+        elif(policys == "parExec" or policys == "parUnseqExec"):
+            echo("parTransformReduceImpl(" & policys & ", " & valss & "[0].addr, " &  valss & "[" & valss & ".len-1].addr, " & valueStr & ", " & binfns & ", " & fns & ")")
+            result = parseExpr("parTransformReduceImpl(" & policys & ", " & valss & "[0].addr, " &  valss & "[" & valss & ".len-1].addr, " & valueStr & ", " & binfns & ", " & fns & ")")
+        else:
+            error("unsupported SomeExecutionPolicy")
+
+macro transformReduce*(policy : typed, vals : typed, initVal : typed, binfn: typed, fn : typed) : untyped = 
+    transformReduceImpl(policy, vals, initVal, binfn, fn)
+]#
+
+#template transformReduce*(policy : SomeSeqPolicy, vals, initVal, binfn, fn : typed) =
+#   seqTransformReduceImpl(policy, vals[0].addr, vals[vals.len-1].addr, initVal, binfn, fn)
+        
 
 ##########
 # asynchronous function execution
 #
-#proc inner_async(fn : proc() {.cdecl.}) : future[void] {.importcpp : "hpx::async(@)", header: "<hpx/hpx.hpp>".}
-#proc inner_async[V](fn : proc() : V {.cdecl.}) : future[V] {.importcpp : "hpx::async(@)", header: "<hpx/hpx.hpp>".}
-#proc async*(fn : proc() {.cdecl.}) : future[void] {.importcpp : "hpx::async(@)", header: "<hpx/hpx.hpp>".}
-
 import jsony
 include cppstl
 
