@@ -17,7 +17,7 @@ distributed memory systems (multi-node/multicore systems).
 
 * futures
 * local/remote asynchronous function execution
-* local/distributed partitioned `seq`, `Table` (unorderedMap)
+* local/distributed `partitionedSeq`, `partitionedTable` (unorderedMap)
 * parallel `foreach`, `reduce`, `transform`, `transformReduce`
 
 ### TODO
