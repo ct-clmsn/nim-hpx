@@ -95,8 +95,8 @@ echo farrvalues
 var trf : float = transformReduce(seqExec, arrvalues, 0.0, ap, xsfm)
 echo trf
 
-#var fftrm : future[float] = transformReduce(parExec, arrvalues, 0.0, ap, xsfm)
-#echo fftrm.wait()
+var fftrm : float = transformReduce(parExec, arrvalues, 0.0, ap, xsfm)
+echo fftrm
 
 # the 'plainAction' macro exposes
 # the nim function to C/C++ and the
