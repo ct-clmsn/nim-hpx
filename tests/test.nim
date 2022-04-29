@@ -51,13 +51,13 @@ echo(values)
 foreach(parExec, values, fn)
 echo(values)
 
-foreach_n(parExec, values, values.len, fn)
+foreachN(parExec, values, values.len, fn)
 echo(values)
 
 foreach(seqExec, values, fn)
 echo(values)
 
-foreach_n(seqExec, values, values.len, fn)
+foreachN(seqExec, values, values.len, fn)
 echo(values)
 
 var arrvalues : array[10, int]
@@ -69,13 +69,13 @@ echo(arrvalues)
 foreach(seqExec, arrvalues, fn)
 echo(arrvalues)
 
-foreach_n(seqExec, arrvalues, arrvalues.len, fn)
+foreachN(seqExec, arrvalues, arrvalues.len, fn)
 echo(arrvalues)
 
 foreach(parExec, arrvalues, fn)
 echo(arrvalues)
 
-foreach_n(parExec, arrvalues, arrvalues.len, fn)
+foreachN(parExec, arrvalues, arrvalues.len, fn)
 echo(arrvalues)
 
 var farrvalues : array[10, float]
