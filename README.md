@@ -24,6 +24,10 @@ distributed memory systems (multi-node/multicore systems).
 
 * collective communications
 
+### Documentation
+
+Please visit [the Wiki](https://github.com/ct-clmsn/nim-hpx/wiki/Main) for more details!
+
 ### Installation Requirements
 
 Dependencies:
