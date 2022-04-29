@@ -18,7 +18,7 @@ distributed memory systems (multi-node/multicore systems).
 * futures
 * local/distributed asynchronous function execution
 * local/distributed partitioned sequences
-* parallel `for`, `reduce`, `transform`, `transformReduce`
+* parallel `foreach`, `reduce`, `transform`, `transformReduce`
 
 ### TODO
 
