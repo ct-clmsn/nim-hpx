@@ -25,7 +25,7 @@ distributed memory systems (multi-node/multicore systems).
 * collective communications
 * SPMD support
 * coarrays
-* asynchronous remote method invocation on classes
+* asynchronous remote method invocation on classes (components and component actions)
 
 ### Documentation
 
