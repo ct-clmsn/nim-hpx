@@ -18,12 +18,15 @@
 #include <hpx/logging/format/destinations.hpp>
 #include <hpx/iostream.hpp>
 #include <hpx/include/actions.hpp>
+#include <hpx/include/apply.hpp>
 #include <hpx/include/components.hpp>
 #include <hpx/include/lcos.hpp>
 #include <hpx/include/parallel_executors.hpp>
 #include <hpx/include/runtime.hpp>
 #include <hpx/include/util.hpp>
 #include <hpx/include/partitioned_vector.hpp>
+#include <hpx/include/unordered_map.hpp>
+#include <hpx/modules/lcos_distributed.hpp>
 #include <hpx/modules/distribution_policies.hpp>
 #include <hpx/modules/actions_base.hpp>
 #include <hpx/modules/executors.hpp>
@@ -68,8 +71,11 @@ import std/strutils
 template registerPartitionedSeq*(V:typedesc) =
     {.emit: ["""HPX_REGISTER_PARTITIONED_VECTOR(""", V,""")"""].}
 
-template registerUnorderedMap*(K : typedesc, V:typedesc) =
-    {.emit: ["""HPX_REGISTER_UNORDERED_MAP(""", K, """,""", V,""")"""].}
+template registerPartitionedTable*(K : typedesc, V:typedesc) =
+    {.emit: ["""HPX_REGISTER_UNORDERED_MAP(""", K, """, """, V,""")"""].}
+
+#template registerChannel*(V:typedesc) =
+#    {.emit: ["""HPX_REGISTER_CHANNEL(""", V,""")"""].}
 
 type
    idType* {.importcpp: "hpx::id_type", header: "<hpx/naming_base/id_type.hpp>".} = object
@@ -79,16 +85,29 @@ type
    lockguard* {.importcpp: "std_lock_guard".} = object
 
    future*[V] {.importcpp: "hpx::future<'0>", header: "<hpx/future.hpp>".} = object
+   sharedFuture*[V] {.importcpp: "hpx::shared_future<'0>", header: "<hpx/future.hpp>".} = object
+
+   #channel*[V] {.importcpp: "hpx::lcos::channel<'0>", header: """#include <hpx/include/components.hpp>
+                                                                 #include <hpx/include/lcos.hpp>""".} = object
+                                                                 
+   #rcvChannel*[V] {.importcpp: "hpx::lcos::receive_channel<'0>", header: """#include <hpx/include/components.hpp>
+                                                                 #include <hpx/include/lcos.hpp>""".} = object
+
+   #sndChannel*[V] {.importcpp: "hpx::lcos::send_channel<'0>", header: """#include <hpx/include/components.hpp>
+                                                                 #include <hpx/include/lcos.hpp>""".} = object
 
    partitionedSeq*[V] {.importcpp: "hpx::partitioned_vector<'0>", header: "<hpx/include/partitioned_vector.hpp>".} = object
-   unorderedMap*[K, V] {.importcpp: "hpx::unordered_map<'0, '1>", header: "<hpx/include/unordered_map.hpp>".} = object
 
-   #containerDistribution* {.importcpp: "hpx::container_distribution_policy", header: "<hpx/modules/distribution_policies.hpp>".} = object
+   partitionedTable*[K, V] {.importcpp: "hpx::unordered_map<'0, '1>", requiresInit, header: """#include <hpx/include/components.hpp>
+                                                                   #include <hpx/include/unordered_map.hpp>""".} = object
 
    sequencedPolicy* {.importcpp: "hpx::execution::sequenced_policy", header: "<hpx/modules/executors.hpp>".} = object
    parallelPolicy* {.importcpp: "hpx::execution::parallel_policy", header: "<hpx/modules/executors.hpp>".} = object
    parallelUnsequencedPolicy* {.importcpp: "hpx::execution::parallel_unsequenced_policy", header: "<hpx/modules/executors.hpp>".} = object
    unsequencedPolicy* {.importcpp: "hpx::execution::unsequenced_policy", header: "<hpx/modules/executors.hpp>".} = object
+
+   componentLockingHook*[V] {.importcpp: "hpx::components::locking_hook<'0>", header: "<hpx/include/components.hpp>".} = object
+   componentBase*[V] {.importcpp: "hpx::components::component_base<'0>", header: "<hpx/include/components.hpp>".} = object
 
 var seqExec* {.importcpp: "hpx::execution::seq", header: "<hpx/modules/executors.hpp>".} : sequencedPolicy
 var parExec* {.importcpp: "hpx::execution::par", header: "<hpx/modules/executors.hpp>".} : parallelPolicy
@@ -117,10 +136,56 @@ proc lsb*(self : gidType) : uint64 {.importcpp: "#.get_lsb()", header : "<hpx/na
 #
 proc get*[V](self : future[V]) : V {.importcpp: "#.get()", header : "<hpx/future.hpp>".}
 
+proc isReady*[V](self : future[V]) : V {.importcpp: "#.is_ready()", header : "<hpx/future.hpp>".}
+
+#proc then*
+
 proc makeReadyFuture*[V](value : V) : future[V] {.importcpp: "hpx::make_ready_future(@)", header: "<hpx/modules/futures.hpp>".}
 
 proc makeReadyFuture*() : future[void] {.importcpp: "hpx::make_ready_future()", header: "<hpx/modules/futures.hpp>".}
 
+##########
+# channel[V]
+#
+#[
+proc newChannel*[V](locality : idType) : channel[V] {.importcpp: "hpx::lcos::channel<'0>(@)", header : "<hpx/modules/lcos_distributed.hpp>", constructor.}
+
+proc get*[V](self : channel[V]) : future[V] {.importcpp: "#.get()", header : "<hpx/modules/lcos_distributed.hpp>".}
+
+proc set*[V](self : channel[V], value : V) {.importcpp: "#.set(#)", header : "<hpx/modules/lcos_distributed.hpp>".}
+
+proc isReady*[V](self : channel[V]) : V {.importcpp: "#.is_ready()", header : "<hpx/modules/lcos_distributed.hpp>".}
+
+proc close*[V](self : channel[V]) {.importcpp: "#.close()", header : "<hpx/modules/lcos_distributed.hpp>".}
+]#
+##########
+# rcvChannel[V]
+#
+#[
+proc newRcvChannel*[V](locality : idType) : rcvChannel[V] {.importcpp: "{@}", header : "<hpx/modules/lcos_distributed.hpp>", constructor.}
+
+proc newRcvChannel*[V](c : channel[V]) : sndChannel[V] {.importcpp: "{@}", header : "<hpx/modules/lcos_distributed.hpp>", constructor.}
+
+proc get*[V](self : rcvChannel[V]) : future[V] {.importcpp: "#.get()", header : "<hpx/modules/lcos_distributed.hpp>".}
+
+proc isReady*[V](self : rcvChannel[V]) : V {.importcpp: "#.is_ready()", header : "<hpx/modules/lcos_distributed.hpp>".}
+
+proc close*[V](self : rcvChannel[V]) {.importcpp: "#.close()", header : "<hpx/modules/lcos_distributed.hpp>".}
+]#
+##########
+# sndChannel[V]
+#
+#[
+proc newSndChannel*[V](locality : idType) : sndChannel[V] {.importcpp: "{@}", header : "<hpx/modules/lcos_distributed.hpp>", constructor.}
+
+proc newSndChannel*[V](c : channel[V]) : sndChannel[V] {.importcpp: "{@}", header : "<hpx/modules/lcos_distributed.hpp>", constructor.}
+
+proc set*[V](self : sndChannel[V], value : V) {.importcpp: "#.set(#)", header : "<hpx/modules/lcos_distributed.hpp>".}
+
+proc isReady*[V](self : sndChannel[V]) : V {.importcpp: "#.is_ready()", header : "<hpx/modules/lcos_distributed.hpp>".}
+
+proc close*[V](self : sndChannel[V]) {.importcpp: "#.close()", header : "<hpx/modules/lcos_distributed.hpp>".}
+]#
 #[
 # https://gist.github.com/oltolm/1738289b5ac866ec6a7e4ef20095178e
 # https://gist.github.com/fowlmouth/48f3340b797c12cb3043
@@ -132,10 +197,6 @@ proc makeReadyFuture*() : future[void] {.importcpp: "hpx::make_ready_future()", 
 # template async*(fn, args : varargs[expr]) : stmt =
 ]#
 
-#proc newContainerDistributionImpl(seg : int) : containerDistribution {.importcpp: "create_distribution(#)", header : "<hpx/modules/distribution_policies.hpp>".}
-
-#proc newContainerDistribution*(seg : int) : containerDistribution =
-#    result = newContainerDistributionImpl(seg)
 
 ##########
 # partitionedSeq
@@ -148,15 +209,19 @@ proc newPartitionedSeq*[V](count : int, ini: V) : partitionedSeq[V] {.importcpp:
 
 #proc newPartitionedSeq*[V](count : int, ini : V, dist : containerDistribution) : partitionedSeq[V] {.importcpp: "{#, #, #}", header : "<hpx/include/partitioned_vector.hpp>".}
 
-proc registerAsImpl[V](self : partitionedSeq[V], symbolic_name : cstring) : future[void] {.importcpp: "#.register_as(std::string{@})", header : "<hpx/include/partitioned_vector.hpp>".}
+#proc registerAsImpl[V](self : partitionedSeq[V], symbolic_name : cstring) : future[void] {.importcpp: "#.register_as(std::string{@})", header : "<hpx/include/partitioned_vector.hpp>", inline.}
 
-proc registerAs*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] =
-    result = registerAsImpl[V](self, cstring(symbolic_name))
+#proc registerAs*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] {.inline.} =
+#    result = registerAsImpl[V](self, cstring(symbolic_name))
 
-proc connectToImpl[V](self : partitionedSeq[V], symbolic_name : cstring) : future[void] {.importcpp: "#.connect_to(std::string{@})", header : "<hpx/include/partitioned_vector.hpp>".}
+#proc connectToImpl[V](self : partitionedSeq[V], symbolic_name : cstring) : future[void] {.importcpp: "#.connect_to(std::string{@})", header : "<hpx/include/partitioned_vector.hpp>", inline.}
 
-proc connectTo*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] =
-    result = connectToImpl[V](self, cstring(symbolic_name))
+#proc connectTo*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] {.inline.} =
+#    result = connectToImpl[V](self, cstring(symbolic_name))
+
+proc registerAs*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] {.importcpp: "#.register_as(std::string{nimToCStringConv(copyString(#))})", header : "<hpx/include/partitioned_vector.hpp>".}
+
+proc connectTo*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] {.importcpp: "#.connect_to(std::string{nimToCStringConv(copyString(#))})", header : "<hpx/include/partitioned_vector.hpp>".}
 
 proc getNumPartitions*[V](self : partitionedSeq[V]) : csize_t {.importcpp: "#.get_num_partitions()", header : "<hpx/include/partitioned_vector.hpp>".}
 
@@ -181,37 +246,35 @@ iterator pairs*[V](self : partitionedSeq[V]) : tuple[a : int, b : V] =
         yield (i, self[i])
 
 ##########
-# unordered_map
+# partitionedTable
 # 
-proc newUnorderedMap*[K,V]() : unorderedMap[K,V] {.importcpp: "{}", header : "<hpx/include/partitioned_vector.hpp>".}
+# use this technique to implement maps -> https://github.com/nim-lang/Nim/issues/4093
+#
+#proc newPartitionedTable*[K, V](count : int) : partitionedTable[K,V] {.importcpp: "hpx::unordered_map<'1, '2>(@)", header : "<hpx/include/unordered_map.hpp>", constructor.}
+#proc newPartitionedTable*[K, V](count : int) : partitionedTable[K,V] {.codegenDecl: "$# $#", header : "<hpx/include/unordered_map.hpp>", constructor.}
+#proc newPartitionedTable*[K, V]() : partitionedTable[K,V] {.importcpp: "$#()", constructor.}
+#
+proc newPartitionedTable*[K, V]() : partitionedTable[K,V] {.importcpp: "hpx::unordered_map<'1, '2>()", header : "<hpx/include/unordered_map.hpp>", constructor.}
 
-proc newUnorderedMap*[K,V](count : int) : unorderedMap[K,V] {.importcpp: "{@}", header : "<hpx/include/partitioned_vector.hpp>".}
+proc registerAs*[K,V](self : partitionedTable[K,V], symbolic_name : string) : future[void] {.importcpp: "#.register_as(std::string{nimToCStringConv(copyString(#))})", header : "<hpx/include/unordered_map.hpp>".}
 
-proc registerAsImpl[K, V](self : unorderedMap[K, V], symbolic_name : cstring) : future[void] {.importcpp: "#.register_as(std::string{@})", header : "<hpx/include/unordered_map.hpp>".}
+proc connectTo*[K,V](self : partitionedTable[K,V], symbolic_name : string) : future[void] {.importcpp: "#.connect_to(std::string{nimToCStringConv(copyString(#))})", header : "<hpx/include/unordered_map.hpp>".}
 
-proc registerAs*[K,V](self : unordered_map[K,V], symbolic_name : string) : future[void] =
-    result = registerAsImpl[K,V](self, cstring(symbolic_name))
+proc getNumPartitions*[K,V](self : partitionedTable[K,V]) : csize_t {.importcpp: "#.get_num_partitions()", header : "<hpx/include/unordered_map.hpp>".}
 
-proc connectToImpl[K, V](self : unordered_map[K, V], symbolic_name : cstring) : future[void] {.importcpp: "#.connect_to(std::string{@})", header : "<hpx/include/unordered_map.hpp>".}
+proc getValue*[K,V](self : partitionedTable[K,V], pos : K) : future[V] {.importcpp: "#.get_value(@)", header: "<hpx/include/unordered_map.hpp>".}
+proc getValue*[K,V](self : partitionedTable[K,V], part : int, pos : K) : future[V] {.importcpp: "#.get_value(@)", header: "<hpx/include/unordered_map.hpp>".}
 
-proc connectTo*[K,V](self : unordered_map[K,V], symbolic_name : string) : future[void] =
-    result = connectToImpl[K,V](self, cstring(symbolic_name))
+proc setValue*[K,V](self : partitionedTable[K,V], pos : K, value : V) : future[void] {.importcpp: "#.set_value(@)", header: "<hpx/include/unordered_map.hpp>".}
+proc setValue*[K,V](self : partitionedTable[K,V], part : int, pos : K, value : V) : future[void] {.importcpp: "#.set_value(@)", header: "<hpx/include/unordered_map.hpp>".}
 
-proc getNumPartitions*[K,V](self : unorderedMap[K,V]) : csize_t {.importcpp: "#.get_num_partitions()", header : "<hpx/include/unordered_map.hpp>".}
+proc `[]`*[K,V](self : partitionedTable[K,V], pos : K) : V {.importcpp: "#[@]", header: "<hpx/include/unordered_map.hpp.hpp>".}
 
-proc getValue*[K,V](self : unorderedMap[K,V], pos : K) : future[V] {.importcpp: "#.get_value(@)", header: "<hpx/include/unordered_map.hpp>".}
-proc getValue*[K,V](self : unorderedMap[K,V], part : int, pos : K) : future[V] {.importcpp: "#.get_value(@)", header: "<hpx/include/unordered_map.hpp>".}
+proc erase*[K,V](self : partitionedTable[K,V], pos : K) : future[csize_t] {.importcpp: "#.erase(@)", header: "<hpx/include/unordered_map.hpp>".}
 
-proc setValue*[K,V](self : unorderedMap[K,V], pos : K, value : V) : future[void] {.importcpp: "#.set_value(@)", header: "<hpx/include/unordered_map.hpp>".}
-proc setValue*[K,V](self : unorderedMap[K,V], part : int, pos : K, value : V) : future[void] {.importcpp: "#.set_value(@)", header: "<hpx/include/unordered_map.hpp>".}
+proc size*[K,V](self : partitionedTable[K,V]) : csize_t {.importcpp: "#.size()", header: "<hpx/include/unordered_map.hpp>".}
 
-proc `[]`*[K,V](self : unorderedMap[K,V], pos : K) : V {.importcpp: "#[@]", header: "<hpx/include/unordered_map.hpp.hpp>".}
-
-proc erase*[K,V](self : unorderedMap[K,V], pos : K) : future[csize_t] {.importcpp: "#.erase(@)", header: "<hpx/include/unordered_map.hpp>".}
-
-proc size*[K,V](self : unorderedMap[K,V]) : csize_t {.importcpp: "#size()", header: "<hpx/include/unordered_map.hpp>".}
-
-proc sizeAsync*[K,V](self : unorderedMap[K,V]) : future[csize_t] {.importcpp: "#size_async()", header: "<hpx/include/unordered_map.hpp>".}
+proc sizeAsync*[K,V](self : partitionedTable[K,V]) : future[csize_t] {.importcpp: "#.size_async()", header: "<hpx/include/unordered_map.hpp>".}
 
 ##########
 # get runtime information
@@ -262,7 +325,7 @@ proc foreachnImpl[V]( policy : SomeExecutionPolicy, vals : ptr V, n : int, fn : 
 proc foreach*[V]( policy : SomeExecutionPolicy, vals : var openArray[V], fn : proc(v: var V) {.cdecl.} ) =
     foreachnImpl[V](policy, cast[ptr V](vals[0].addr), vals.len, fn)
 
-proc foreachN*[V]( policy : SomeExecutionPolicy, vals : var openArray[V], n : int, fn : proc(v: var V) {.cdecl.} ) =
+proc foreach*[V]( policy : SomeExecutionPolicy, vals : var openArray[V], n : int, fn : proc(v: var V) {.cdecl.} ) =
     foreachnImpl[V](policy, cast[ptr V](vals[0].addr), n, fn)
 
 proc transformImpl[V, W]( policy : SomeSeqPolicy, valbeg : ptr V, valend : ptr V, ovalbeg : ptr W, fn : proc(v: V) : W {.cdecl.} ) {.importcpp: "hpx::transform(#, #, #, #, #)", header : "hpx/modules/algorithms.hpp".}
@@ -368,7 +431,11 @@ proc arglist_totuple(n : NimNode) : ( int, string, string, string ) =
     for i in 1..<n[3].len:
        let arg = n[3][i]
        if arg.kind == nnkIdentDefs:
-           if arg[1].kind != nnkEmpty:
+           let argkind = arg[1].kind
+           if argkind == nnkBracketExpr: 
+               let strlit = arg[1].toStrLit.strVal
+               sargs.add( arg[0].strVal & " : " & strlit )
+           elif argkind != nnkEmpty:
                sargs.add( arg[0].strVal & " : " & arg[1].strVal )
            else:
                sargs.add( arg[0].strVal )
@@ -456,8 +523,12 @@ proc plain_action_code(n : NimNode) : NimNode =
                 "    " & $fnname & "()\n" &
                 "    result = \"\".toCppString"
         else:
+             var argtype_param : string = argtype_str
+             if carg > 1:
+                argtype_param = "(" & argtype_param & ")"
+
              inner_exec_str = "proc " & $fnname & "_wrapper(strvalue : CppString) : CppString {.cdecl, exportc : \""& $fnname & "_wrapper\".} = \n" &
-                "    var (" & arg_ident_str & ") = nim_hpx_unmarshal[ (" & argtype_str & ") ](strvalue)\n" &
+                "    var (" & arg_ident_str & ") = nim_hpx_unmarshal[ " & argtype_param & " ](strvalue)\n" &
                 "    " & $fnname & "(" & arg_ident_str & ")\n" &
                 "    result = \"\".toCppString"
 
@@ -477,7 +548,7 @@ proc plain_action_code(n : NimNode) : NimNode =
 
     if hasretval:
         if carg < 1:
-            var inner_async_sig : string = "proc async_" & $fnname & "_wrapper_action(ident : idType) : future[CppString] {.importcpp: \"hpx::async<" & $fnname & "_wrapper_action>(#,std::string{})\".}"
+            var inner_async_sig : string = "proc async_" & $fnname & "_wrapper_action(ident : idType) : CppString {.importcpp: \"hpx::sync<" & $fnname & "_wrapper_action>(#,std::string{})\".}"
 
             var async_sig : string = ""
             if hasgeneric:
@@ -489,8 +560,7 @@ proc plain_action_code(n : NimNode) : NimNode =
 
             async_sig = async_sig &
                 "    proc inner(ident : idType) : " & ret_args_str & " {.cdecl.} =\n" &
-                "        var res : future[CppString] = async_" & $fnname & "_wrapper_action(ident)\n" &
-                "        var strvalue : CppString = res.get()\n" &
+                "        var strvalue : CppString = async_" & $fnname & "_wrapper_action(ident)\n" &
                 "        result = nim_hpx_unmarshal[" & ret_args_str & "](strvalue)\n\n" &
                 "    proc inner_async(fn : proc(ident:idType) : " & ret_args_str & " {.cdecl, gcsafe, locks: \"unknown\".}, ident : idType) : future[" & ret_args_str & "] {.importcpp: \"hpx::async(@)\".}\n\n" &
                 "    result = inner_async(inner, ident)" 
@@ -501,7 +571,7 @@ proc plain_action_code(n : NimNode) : NimNode =
             result.add( parseStmt( async_sig ) )
 
         else:
-            var inner_async_sig : string = "proc async_" & $fnname & "_wrapper_action(ident : idType, strvalue : CppString) : future[CppString] {.importcpp: \"hpx::async<" & $fnname & "_wrapper_action>(@)\".}"
+            var inner_async_sig : string = "proc async_" & $fnname & "_wrapper_action(ident : idType, strvalue : CppString) : CppString {.importcpp: \"hpx::sync<" & $fnname & "_wrapper_action>(@)\".}"
 
             var async_sig : string = ""
             if hasgeneric:
@@ -511,13 +581,16 @@ proc plain_action_code(n : NimNode) : NimNode =
                 async_sig = async_sig & 
                     "proc async(self : proc(" & argidentwtype_str & ") : " & ret_args_str & " {.cdecl, gcsafe, locks: \"unknown\".}, ident : idType, " & argidentwtype_str & ") : future[ " & ret_args_str & " ] = \n"
 
+            var argtype_param : string = argtype_str
+            if carg > 1:
+               argtype_param = "(" & argtype_param & ")"
+
             async_sig = async_sig &
                 "    proc inner(ident : idType, arg_ident_str : CppString) : " & ret_args_str & " {.cdecl.} =\n" &
-                "        var res : future[CppString] = async_" & $fnname & "_wrapper_action(ident, arg_ident_str)\n" &
-                "        var strvalue : CppString = res.get()\n" &
+                "        var strvalue : CppString = async_" & $fnname & "_wrapper_action(ident, arg_ident_str)\n" &
                 "        result = nim_hpx_unmarshal[" & ret_args_str & "](strvalue)\n\n" &
                 "    proc inner_async( fn : proc(ident : idType, arg_ident_str : CppString) : " & ret_args_str & " {.cdecl.}, ident : idType, arg_ident_str : CppString ) : future[ " & ret_args_str & "] {.importcpp: \"hpx::async(@)\".}\n\n" &
-                "    var ivalue : CppString = nim_hpx_marshal[ (" & argtype_str & ") ]( (" & arg_ident_str & ") )\n" & 
+                "    var ivalue : CppString = nim_hpx_marshal[ " & argtype_param & " ]( (" & arg_ident_str & ") )\n" & 
                 "    result = inner_async(inner, ident, ivalue)"
 
             #echo inner_async_sig
@@ -527,7 +600,7 @@ proc plain_action_code(n : NimNode) : NimNode =
 
     else:
         if carg < 1:
-            var inner_async_sig : string = "proc async_" & $fnname & "_wrapper_action(ident : idType) : future[CppString] {.importcpp: \"hpx::async<" & $fnname & "_wrapper_action>(#, std::string{})\".}"
+            var inner_async_sig : string = "proc async_" & $fnname & "_wrapper_action(ident : idType) : CppString {.importcpp: \"hpx::sync<" & $fnname & "_wrapper_action>(#, std::string{})\".}"
 
             var async_sig : string = ""
             if hasgeneric:
@@ -538,8 +611,7 @@ proc plain_action_code(n : NimNode) : NimNode =
                     "proc async(self : proc() {.cdecl, gcsafe, locks: \"unknown\".}, ident : idType) : future[void] = \n"
 
             async_sig = async_sig &
-                "    var val : future[CppString] = async_" & $fnname & "_wrapper_action(ident)\n" &
-                "    discard val.get()\n" &
+                "    discard async_" & $fnname & "_wrapper_action(ident)\n" &
                 "    result = makeReadyFuture()"
 
             #echo inner_async_sig
@@ -548,7 +620,7 @@ proc plain_action_code(n : NimNode) : NimNode =
             result.add( parseStmt( async_sig ) )
 
         else:
-            var inner_async_sig : string = "proc async_" & $fnname & "_wrapper_action(ident : idType, strvalue : CppString) : future[CppString] {.importcpp: \"hpx::async<" & $fnname & "_wrapper_action>(#, #)\".}"
+            var inner_async_sig : string = "proc async_" & $fnname & "_wrapper_action(ident : idType, strvalue : CppString) : CppString {.importcpp: \"hpx::sync<" & $fnname & "_wrapper_action>(#, #)\".}"
 
             var async_sig : string = ""
             if hasgeneric:
@@ -558,9 +630,12 @@ proc plain_action_code(n : NimNode) : NimNode =
                 async_sig = async_sig &
                     "proc async(self : proc(" & argidentwtype_str & ") {.cdecl, gcsafe, locks: \"unknown\".}, ident : idType, " & argidentwtype_str & ") : future[ void ] = \n"
 
-            async_sig = async_sig & "    var strargs : CppString = nim_hpx_marshal[ (" & argtype_str & ") ]( (" & arg_ident_str & ") )\n" &
-                "    var val : future[CppString] = async_" & $fnname & "_wrapper_action(ident, strargs)\n" &
-                "    discard val.get()\n" &
+            var argtype_param : string = argtype_str
+            if carg > 1:
+                argtype_param = "(" & argtype_param & ")" 
+
+            async_sig = async_sig & "    var strargs : CppString = nim_hpx_marshal[ " & argtype_param & " ]( (" & arg_ident_str & ") )\n" &
+                "    discard async_" & $fnname & "_wrapper_action(ident, strargs)\n" &
                 "    result = makeReadyFuture()"
 
             #echo inner_async_sig
