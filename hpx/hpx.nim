@@ -209,16 +209,6 @@ proc newPartitionedSeq*[V](count : int, ini: V) : partitionedSeq[V] {.importcpp:
 
 #proc newPartitionedSeq*[V](count : int, ini : V, dist : containerDistribution) : partitionedSeq[V] {.importcpp: "{#, #, #}", header : "<hpx/include/partitioned_vector.hpp>".}
 
-#proc registerAsImpl[V](self : partitionedSeq[V], symbolic_name : cstring) : future[void] {.importcpp: "#.register_as(std::string{@})", header : "<hpx/include/partitioned_vector.hpp>", inline.}
-
-#proc registerAs*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] {.inline.} =
-#    result = registerAsImpl[V](self, cstring(symbolic_name))
-
-#proc connectToImpl[V](self : partitionedSeq[V], symbolic_name : cstring) : future[void] {.importcpp: "#.connect_to(std::string{@})", header : "<hpx/include/partitioned_vector.hpp>", inline.}
-
-#proc connectTo*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] {.inline.} =
-#    result = connectToImpl[V](self, cstring(symbolic_name))
-
 proc registerAs*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] {.importcpp: "#.register_as(std::string{nimToCStringConv(copyString(#))})", header : "<hpx/include/partitioned_vector.hpp>".}
 
 proc connectTo*[V](self : partitionedSeq[V], symbolic_name : string) : future[void] {.importcpp: "#.connect_to(std::string{nimToCStringConv(copyString(#))})", header : "<hpx/include/partitioned_vector.hpp>".}
