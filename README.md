@@ -22,6 +22,7 @@ distributed memory systems (multi-node/multicore systems).
 
 ### TODO
 
+* channels
 * collective communications
 * SPMD support
 * coarrays
