@@ -20,6 +20,9 @@ CFLAGS=-std=c++17
 all:
 	nim cpp --clibdir:$(LIBDIR) -d:danger -d:globalSymbols --cincludes:$(INCDIR) --passC:"$(CFLAGS)" tests/test.nim
 	mv tests/test .
+	nim cpp --clibdir:$(LIBDIR) -d:danger -d:globalSymbols --cincludes:$(INCDIR) --passC:"$(CFLAGS)" tests/testtable.nim
+	mv tests/testtable .
 
 clean:
 	rm test
+	rm testtable
